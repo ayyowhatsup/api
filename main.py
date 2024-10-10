@@ -62,8 +62,11 @@ async def validate_api_key(request: Request, call_next):
     expected_api_keys = os.getenv("ALLOW_API_KEYS", "").split(",")
 
     if not api_key or api_key not in expected_api_keys:
-        raise ApiException({"message": "Forbidden: Invalid or missing API key",
-                           "code": "invalid_api_key", "status": 403})
+        return JSONResponse(
+            status_code=403,
+            content={"message": "Forbidden: Invalid or missing API key",
+                     "code": "invalid_api_key"}
+        )
 
     response = await call_next(request)
     return response
