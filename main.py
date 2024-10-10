@@ -123,22 +123,25 @@ def get_yt_dlp_download_link(url: Union[HttpUrl, None] = None):
             {"message": "Invalid URL", "code": "invalid_url", "status": 400}) from e
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(url, download=False)
-        video_url = info_dict.get('url', '')
-        if not video_url:
-            raise ApiException({
-                "message": "No video URL found",
-                "code": "no_video_url_found",
-                "status": 400
-            })
+        try:
+            info_dict = ydl.extract_info(url, download=False)
+            video_url = info_dict.get('url', '')
+            if not video_url:
+                raise Exception("No video URL found")
 
-        return {
-            "data": {
-                "url": video_url
-            },
-            "code": "success",
-            "message": "Request was successful"
-        }
+            return {
+                "data": {
+                    "url": video_url
+                },
+                "code": "success",
+                "message": "Request was successful"
+            }
+        except Exception as e:
+            raise ApiException({
+                "message": str(e),
+                "code": "video_url_extraction_error",
+                "status": 400
+            }) from e
 
 
 @ app.exception_handler(ApiException)
